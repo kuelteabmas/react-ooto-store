@@ -1,13 +1,19 @@
-import React from "react";
+import React from "react"
 import { formatPrice } from '../helpers'
-
+import PropTypes from 'prop-types'
 
 class Order extends React.Component {
+
+  static propTypes = {
+    fishes: PropTypes.object,
+    order: PropTypes.object,
+    removeFromOrder: PropTypes.func,
+  }
 
   renderOrder = key => {
     const fish = this.props.fishes[key];
     const count = this.props.order[key];
-    const isAvailable = fish.status === 'available'
+    const isAvailable = fish && fish.status === 'available'
 
     if (!isAvailable) {
       return <li key={key}>
@@ -18,10 +24,11 @@ class Order extends React.Component {
 
     return <li key={key}>
       {count} lbs {fish.name}
-
+      &nbsp;
       {formatPrice(count * fish.price)}
     </li>
   };
+
   render() {
     const orderIds = Object.keys(this.props.order);
     const total = orderIds.reduce((prevTotal, key) => {
@@ -38,11 +45,11 @@ class Order extends React.Component {
     return (
       <div className="order-wrap">
         <h3>Order</h3>
-        <ul className="order">
+        <ul>
           {orderIds.map(this.renderOrder)}
         </ul>
 
-        <div className="total">
+        <div className="total underline">
           Total: <strong>{formatPrice(total)}</strong>
         </div>
       </div>
