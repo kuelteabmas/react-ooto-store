@@ -1,4 +1,6 @@
-import React from "react";
+import React from "react"
+import PropTypes from 'prop-types'
+
 
 import Header from "./components/Header";
 import Inventory from "./components/Inventory";
@@ -13,16 +15,38 @@ class App extends React.Component {
     order: {}
   };
 
+  static propTypes = {
+    match: PropTypes.object
+  }
+
   componentDidMount() {
     const storeId = this.props.match.params.storeId;
+
+    // First reisntate our localstorage once page refreshes
+    const localStorageRef = localStorage.getItem(storeId);
+    if (localStorageRef) {
+      this.setState({
+        order: JSON.parse(localStorageRef) // parse to change String back to Object
+      })
+    }
+
+
     this.ref = base.syncState(`${storeId}/fishes`, {
-    context: this,
-    state: 'fishes'
-  });
+      context: this,
+      state: 'fishes'
+    });
   }
 
   componentWillUnmount() {
     base.removeBinding(this.ref);
+  }
+  componentDidUpdate() {
+    const storeId = this.props.match.params.storeId;
+    const order = this.state.order;
+    localStorage.setItem(
+      storeId,
+      JSON.stringify(order) // JSON.stringfy is used here to change jsonObject to String
+    );
   }
 
   addFish = (fish) => {
@@ -39,6 +63,32 @@ class App extends React.Component {
     console.log("adding fis h yo")
   };
 
+  updateFish = (key, updatedFish) => {
+    // fst, take a copy of the current state
+    const fishes = { ...this.state.fishes };
+
+    // then, update the state
+    fishes[key] = updatedFish;
+
+    // finally, set to state
+    this.setState({
+      fishes: fishes
+    })
+  }
+
+deleteFish = key => {
+  // first, take a copy of state
+  const fishes = { ...this.state.fishes};
+
+  // then, update the state
+  fishes[key] = null;
+
+  // finally, set to state
+  this.setState({
+    fishes: fishes
+  })
+}
+
   addToOrder = (key) => {
     // take a copy of the existing state
     const order = { ...this.state.order }
@@ -54,7 +104,7 @@ class App extends React.Component {
   loadSampleFishes = () => {
     this.setState({
       fishes: sampleFishes
-    })
+    });
   }
 
 
@@ -81,7 +131,15 @@ class App extends React.Component {
           fishes={this.state.fishes}
           order={this.state.order}
         />
-        <Inventory addFish={this.addFish} loadSampleFishes={this.loadSampleFishes} />
+        <Inventory 
+          addFish={this.addFish}
+          updateFish={this.updateFish}
+          deleteFish={this.deleteFish}
+          loadSampleFishes={this.loadSampleFishes}
+          fishes={this.state.fishes}
+          storeId={this.props.match.params.storeId}
+
+        />
 
       </div>
     );
