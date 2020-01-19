@@ -15,6 +15,13 @@ npm install
 # Run development server
 npm start
 
+and then go to http://localhost:3000
+
+OR
+
+# Install server dependencies
+npm install
+
 # Build for production
 npm run build
 ```
